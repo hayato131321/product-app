@@ -1,10 +1,12 @@
+import { useState } from "react";
+
 function ProductCategoryRow({category}){
 return(
-<tl>
+<tr>
 <th colSpan="2">
 {category}
 </th>
-</tl>
+</tr>
 );
 };
 
@@ -22,15 +24,18 @@ return(
 );
 }
 
-function ProductTable({ products }) {
+function ProductTable({products,filterText,inStockOnly}) {
 const rows =[];
 let lastCategory=null;
-products.array.forEach((product) => {
+products.forEach((product) => {
+if (product.name.toLowerCase().indexOf(filterText.toLowerCase()) === -1)
+{return;}
+if (inStockOnly && !product.stocked) {return;}
 if(product.category!==lastCategory){
-rows.push(<ProductCategoryRow category={product.category} key={product.category}/> )
+rows.push(<ProductCategoryRow category={product.category} key={product.category}/> )}
 rows.push(<ProductRow product={product} key={product.name}/>)
 lastCategory=product.category;
-}});
+});
 return(<table>
 <thead>
 <tr>
@@ -43,19 +48,28 @@ return(<table>
 </tbody> 
 </table>);}
 
-function SerchBar(){return(
+function SearchBar({filterText,inStockOnly,onFilterTextChange,
+  onInStockOnlyChange}){return(
 <form>
-<input type="text" placeholder="Search..."></input>
+<div>
+<input type="text" value={filterText}  placeholder="Search..."  onChange={(e) => onFilterTextChange(e.target.value)}/>
+</div>
+<div>
 <label>
-<input type="checkbox">{''}Only show products in stock</input>
+<input type="checkbox"  checked={inStockOnly}   onChange={(e) => onInStockOnlyChange(e.target.checked)}/>{''}Only show products in stock
 </label>  
+</div>
 </form>
 )}
 
 function FilterableProductTable({ products }) {
+const[filterText,setFilterText]=useState("")
+const[inStockOnly,setInStockOnly]=useState(false)
 return(
-<><SerchBar/>
-<ProductTable products={products}/></> )
+<><SearchBar filterText={filterText}inStockOnly={inStockOnly} 
+onFilterTextChange={setFilterText}
+onInStockOnlyChange={setInStockOnly} />
+<ProductTable products={products}filterText={filterText}inStockOnly={inStockOnly}/></> )
 }
 
 
